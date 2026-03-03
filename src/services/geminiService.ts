@@ -42,14 +42,14 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
           {
             text: `Analyze this climbing wall image and create a boulder itinerary based on this request: "${prompt}". 
             
-            WALL SPECIFICATIONS & ERGONOMICS:
+            WALL SPECIFICATIONS & ERGONOMICS (STRICT):
             - Width: ${width} meters | Height: ${height} meters.
-            - Human Reach Constraints:
-                * Comfortable Reach: < 0.7 meters.
-                * Maximum Reach (Hands): 1.2 meters (only for high difficulty).
-                * Maximum Reach (Feet): 1.0 meter.
-                * Foot-to-Hand Distance: Feet should generally be 0.4m to 0.9m below the hands.
-            - Use these dimensions to ensure every move is physically possible for a human climber.
+            - HUMAN REACH CONSTRAINTS (MANDATORY):
+                * Maximum Reach (Hands): 0.7 meters (70cm). NEVER exceed this distance between consecutive hand holds.
+                * Maximum Reach (Feet): 0.6 meters.
+                * Foot-to-Hand Distance: Feet MUST be between 0.3m and 0.8m below the hands to maintain balance.
+            - This is a BOULDER wall with small holds. The climber needs frequent, close points of contact.
+            - Use these dimensions to ensure every move is physically possible for a human climber without over-stretching.
             
             ROUTE ORIENTATION:
             - If the request specifies 'vertical', the route should start at the bottom and finish at the top.
@@ -65,8 +65,8 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
                (x=0 is left, x=1000 is 6.5m right; y=0 is top, y=1000 is 3.5m bottom).
             4. Create a 'beta' sequence: a series of steps showing how a climber moves.
                - The 'start' and 'finish' (top) roles MUST be assigned to actual colored holds identified in step 1. NEVER place a start or finish marker on empty wall space.
-               - For each step, ensure the distance from the previous hold to the new hold does not exceed the ergonomic limits above.
-               - Ensure there are always foot holds available that allow the climber to reach the next hand hold.
+               - For each step, ensure the distance from the previous hold to the new hold DOES NOT EXCEED 0.7 meters.
+               - Ensure there are always foot holds available that allow the climber to reach the next hand hold within the 0.7m limit.
             Return the result as a JSON object following the Itinerary interface.`,
           },
         ],
