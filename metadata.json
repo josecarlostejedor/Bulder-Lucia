@@ -1,0 +1,5 @@
+{
+  "name": "Boulder Itinerary Generator",
+  "description": "Detects climbing holds on a boulder wall and generates itineraries with marked images and Word reports.",
+  "requestFramePermissions": []
+}
