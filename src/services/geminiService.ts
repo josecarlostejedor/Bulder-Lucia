@@ -145,8 +145,12 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
     } catch (e: any) {
       console.warn(`Fallo con el modelo ${modelName}:`, e.message);
       lastError = e;
-      // Si es un error 404 (modelo no encontrado), pasamos al siguiente inmediatamente
-      // Si es un error 503 o 429, también pasamos al siguiente
+      
+      // Si es un error de cuota (429), esperamos 3 segundos antes de probar el siguiente modelo
+      if (e.message?.includes('429')) {
+        console.log("Límite de cuota alcanzado, esperando 3 segundos...");
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
     }
   }
 
