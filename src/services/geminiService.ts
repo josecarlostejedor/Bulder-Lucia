@@ -30,8 +30,9 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
   const apiKey = "AIzaSyAtSwcb5cIRAKiZZ5G49iEF3QYO-f5yk5o".trim();
   const ai = new GoogleGenAI({ apiKey });
   
+  // Usamos gemini-3-flash-preview que es mucho más rápido para análisis de imágenes y JSON
   const response = await ai.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-3-flash-preview",
     contents: [
       {
         parts: [
@@ -47,28 +48,28 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
             WALL SPECIFICATIONS & ERGONOMICS (STRICT):
             - Width: ${width} meters | Height: ${height} meters.
             - HUMAN REACH CONSTRAINTS (MANDATORY):
-                * Maximum Reach (Hands): 0.7 meters (70cm). NEVER exceed this distance between consecutive hand holds.
-                * Maximum Reach (Feet): 0.6 meters.
-                * Foot-to-Hand Distance: Feet MUST be between 0.3m and 0.8m below the hands to maintain balance.
-            - This is a BOULDER wall with small holds. The climber needs frequent, close points of contact.
-            - Use these dimensions to ensure every move is physically possible for a human climber without over-stretching.
+                * Maximum Distance (ANY consecutive holds): 0.7 meters (70cm).
+                * Maximum Foot-to-Foot Distance: 0.6 meters (60cm).
+                * Maximum Hand-to-Hand Distance: 0.7 meters (70cm).
+                * Foot-to-Hand Distance: Feet MUST be between 0.3m and 0.7m below the hands.
+            - This is a BOULDER wall for students. The climber needs VERY close points of contact.
+            - If a move looks longer than 70cm, it is FORBIDDEN.
             
             ROUTE ORIENTATION:
             - If the request specifies 'vertical', the route should start at the bottom and finish at the top.
-            - If the request specifies 'transversal', the route should travel horizontally across the 6.5m width (e.g., from left to right or right to left), maintaining a relatively consistent height or using the full width of the wall.
+            - If the request specifies 'transversal', the route should travel horizontally across the ${width}m width, maintaining a relatively consistent height.
             
             INSTRUCTIONS:
             1. Identify specific colored climbing holds (presas). 
-               - CRITICAL FORBIDDEN ACTION: DO NOT select the small black screw holes (agujeros de tornillos).
-               - ONLY select actual climbing holds which are larger, have distinct colors, and show physical volume/shadows.
-               - Every coordinate (x, y) MUST be the exact center of a visible colored hold.
+               - CRITICAL: DO NOT select the small black screw holes (t-nuts).
+               - ONLY select actual climbing holds with color and volume.
             2. Assign a unique 'id' to each selected hold.
-            3. Provide normalized coordinates (x, y) for the center of each colored hold (0-1000). 
-               (x=0 is left, x=1000 is 6.5m right; y=0 is top, y=1000 is 3.5m bottom).
-            4. Create a 'beta' sequence: a series of steps showing how a climber moves.
-               - The 'start' and 'finish' (top) roles MUST be assigned to actual colored holds identified in step 1. NEVER place a start or finish marker on empty wall space.
+            3. Provide normalized coordinates (x, y) (0-1000). 
+               (x=0 is left, x=1000 is ${width}m right; y=0 is top, y=1000 is ${height}m bottom).
+            4. Create a 'beta' sequence:
+               - The 'start' and 'finish' MUST be actual colored holds.
                - For each step, ensure the distance from the previous hold to the new hold DOES NOT EXCEED 0.7 meters.
-               - Ensure there are always foot holds available that allow the climber to reach the next hand hold within the 0.7m limit.
+               - Ensure foot holds are always within 0.7m of each other.
             Return the result as a JSON object following the Itinerary interface.`,
           },
         ],
