@@ -261,12 +261,12 @@ export default function App() {
       setTimeout(() => setShowToast(null), 3000);
     } catch (error: any) {
       console.error("Analysis failed:", error);
-      let errorMsg = "Error al analizar la imagen. Por favor, inténtalo de nuevo.";
+      let errorMsg = error.message || "Error al analizar la imagen. Por favor, inténtalo de nuevo.";
       
       if (error.message?.includes('API_KEY')) {
-        errorMsg = "Falta la API KEY de Gemini. Configúrala en las variables de entorno como VITE_GEMINI_API_KEY.";
+        errorMsg = "Falta la API KEY de Gemini. Configúrala en las variables de entorno de Vercel como VITE_GEMINI_API_KEY.";
       } else if (error.message?.includes('429')) {
-        errorMsg = "Límite de cuota excedido. Espera un momento o usa una clave de pago.";
+        errorMsg = "Límite de cuota excedido (429). Espera un momento o usa una clave de pago.";
       }
       
       alert(errorMsg);
