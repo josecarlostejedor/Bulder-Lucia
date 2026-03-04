@@ -252,9 +252,13 @@ export default function App() {
     if (!image) return;
     setLoading(true);
     try {
+      // Comprimimos la imagen antes de enviarla para evitar bloqueos por tamaño
+      const compressedImage = await compressImage(image);
+      
       const orientationText = routeType === 'vertical' ? 'vertical (de abajo a arriba)' : 'transversal (travesía de lado a lado)';
       const fullPrompt = `Diseña una ruta de grado ${selectedGrade} (${selectedCategory}) con un recorrido ${orientationText}. ${prompt}. RECUERDA: Máxima distancia entre presas 70cm.`;
-      const result = await analyzeWall(image, fullPrompt, wallWidth, wallHeight);
+      
+      const result = await analyzeWall(compressedImage, fullPrompt, wallWidth, wallHeight);
       setItinerary(result);
       setHistory(prev => [result, ...prev].slice(0, 5));
       setShowToast("¡Itinerario generado con éxito!");
@@ -263,21 +267,50 @@ export default function App() {
       console.error("Analysis failed:", error);
       let errorMsg = error.message || "Error desconocido al analizar la imagen.";
       
-      // Si el error viene de Google, intentamos mostrar el detalle técnico
-      if (error.message) {
-        errorMsg = `Error técnico de Google: ${error.message}`;
-      }
-      
       if (error.message?.includes('API_KEY') || error.message?.includes('API key')) {
-        errorMsg = `Error de API KEY: La clave configurada no es aceptada por Google.\n\nDetalle: ${error.message}\n\nVerifica en Google AI Studio que la clave sea correcta y tenga permisos para Gemini 3.1.`;
+        errorMsg = "Error de API KEY: La clave no es válida o no tiene permisos. Verifica en Google AI Studio.";
       } else if (error.message?.includes('429')) {
-        errorMsg = "Límite de cuota excedido (429). Por favor, espera un minuto antes de intentar de nuevo o usa una clave con facturación habilitada.";
+        errorMsg = "Límite de cuota excedido. Por favor, espera un minuto.";
       }
       
       alert(`DETALLE DEL ERROR:\n${errorMsg}`);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Función para comprimir la imagen y evitar que la IA se bloquee
+  const compressImage = (base64Str: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64Str;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200; // Tamaño óptimo para la IA
+        const MAX_HEIGHT = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7)); // Comprimimos al 70% de calidad
+      };
+      img.onerror = () => resolve(base64Str); // Si falla, enviamos la original
+    });
   };
 
   const handleDownload = async () => {
