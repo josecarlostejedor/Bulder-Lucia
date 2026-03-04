@@ -272,9 +272,9 @@ export default function App() {
       let errorMsg = error.message || "Error desconocido al analizar la imagen.";
       
       if (error.message?.includes('API_KEY') || error.message?.includes('API key')) {
-        errorMsg = "Error de API KEY: La clave no es válida o no tiene permisos. Verifica en Google AI Studio.";
+        errorMsg = `Error de API KEY: La clave no es válida o no tiene permisos. Verifica en Google AI Studio.\n\nError original: ${error.message}`;
       } else if (error.message?.includes('429')) {
-        errorMsg = "Límite de cuota excedido. Por favor, espera un minuto.";
+        errorMsg = `Límite de cuota excedido. Por favor, espera un minuto.\n\nError original: ${error.message}`;
       }
       
       alert(`DETALLE DEL ERROR:\n${errorMsg}`);
@@ -790,18 +790,17 @@ export default function App() {
 
             {/* Legend */}
             {itinerary && (
-              <div className="mt-6 space-y-4">
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <LegendItem color="#22c55e" label="Inicio" />
-                  <LegendItem color="#3b82f6" label="Manos" />
-                  <LegendItem color="#eab308" label="Pies" />
-                  <LegendItem color="#ef4444" label="Final" />
-                </div>
-                <p className="text-center text-[#5A5A40]/60 text-xs font-medium italic">
-                  App creada por Jose Carlos Tejedor
-                </p>
+              <div className="mt-6 flex flex-wrap gap-4 justify-center">
+                <LegendItem color="#22c55e" label="Inicio" />
+                <LegendItem color="#3b82f6" label="Manos" />
+                <LegendItem color="#eab308" label="Pies" />
+                <LegendItem color="#ef4444" label="Final" />
               </div>
             )}
+            
+            <p className="mt-8 text-center text-[#5A5A40]/60 text-xs font-medium italic">
+              App creada por Jose Carlos Tejedor
+            </p>
           </div>
         </div>
       </div>
