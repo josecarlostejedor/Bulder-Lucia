@@ -256,7 +256,11 @@ export default function App() {
       const compressedImage = await compressImage(image);
       
       const orientationText = routeType === 'vertical' ? 'vertical (de abajo a arriba)' : 'transversal (travesía de lado a lado)';
-      const fullPrompt = `Diseña una ruta de grado ${selectedGrade} (${selectedCategory}) con un recorrido ${orientationText}. ${prompt}. RECUERDA: Máxima distancia entre presas 70cm.`;
+      const fullPrompt = `Diseña una ruta de grado ${selectedGrade} (${selectedCategory}) con un recorrido ${orientationText}. ${prompt}. 
+      RECUERDA: 
+      1. Máxima distancia entre presas 70cm (apto para 1.75m de altura).
+      2. Usa un número lógico de presas (aprox. 8-12 para el muro completo).
+      3. NO USES los agujeros de los tornillos, solo presas de colores.`;
       
       const result = await analyzeWall(compressedImage, fullPrompt, wallWidth, wallHeight);
       setItinerary(result);
@@ -786,11 +790,16 @@ export default function App() {
 
             {/* Legend */}
             {itinerary && (
-              <div className="mt-6 flex flex-wrap gap-4 justify-center">
-                <LegendItem color="#22c55e" label="Inicio" />
-                <LegendItem color="#3b82f6" label="Manos" />
-                <LegendItem color="#eab308" label="Pies" />
-                <LegendItem color="#ef4444" label="Final" />
+              <div className="mt-6 space-y-4">
+                <div className="flex flex-wrap gap-4 justify-center">
+                  <LegendItem color="#22c55e" label="Inicio" />
+                  <LegendItem color="#3b82f6" label="Manos" />
+                  <LegendItem color="#eab308" label="Pies" />
+                  <LegendItem color="#ef4444" label="Final" />
+                </div>
+                <p className="text-center text-[#5A5A40]/60 text-xs font-medium italic">
+                  App creada por Jose Carlos Tejedor
+                </p>
               </div>
             )}
           </div>
