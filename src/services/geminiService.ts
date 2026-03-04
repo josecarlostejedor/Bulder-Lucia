@@ -26,7 +26,14 @@ export interface Itinerary {
 }
 
 export async function analyzeWall(imageData: string, prompt: string, width: number, height: number): Promise<Itinerary> {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  // Try to get API key from multiple possible sources for local and Vercel environments
+  const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
+  
+  if (!apiKey || apiKey === 'undefined') {
+    throw new Error('API_KEY_MISSING: No se ha encontrado la clave API de Gemini. En Vercel, añade VITE_GEMINI_API_KEY en Environment Variables.');
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
   
   const response = await ai.models.generateContent({
     model: "gemini-3.1-pro-preview",
