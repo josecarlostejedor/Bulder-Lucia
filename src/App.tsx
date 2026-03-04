@@ -291,8 +291,8 @@ export default function App() {
       img.src = base64Str;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1200; // Tamaño óptimo para la IA
-        const MAX_HEIGHT = 1200;
+        const MAX_WIDTH = 1000; // Reducimos de 1200 a 1000 para ganar velocidad
+        const MAX_HEIGHT = 1000;
         let width = img.width;
         let height = img.height;
 
