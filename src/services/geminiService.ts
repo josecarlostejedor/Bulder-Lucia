@@ -26,11 +26,14 @@ export interface Itinerary {
 }
 
 export async function analyzeWall(imageData: string, prompt: string, width: number, height: number): Promise<Itinerary> {
-  // Usamos la variable de entorno para evitar que Google bloquee la clave por "leaked"
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  // Limpiamos la clave de posibles espacios o comillas accidentales
+  const rawKey = (import.meta as any).env.VITE_GEMINI_API_KEY || "";
+  const apiKey = rawKey.trim().replace(/["']/g, "");
   
-  if (!apiKey || apiKey.length < 10) {
-    throw new Error("Falta la API KEY. Configúrala en Vercel como VITE_GEMINI_API_KEY.");
+  if (!apiKey || !apiKey.startsWith("AIza")) {
+    throw new Error(`La aplicación no detecta una clave válida. 
+    Detectado: "${apiKey ? apiKey.substring(0, 4) + "..." : "NADA"}". 
+    Asegúrate de haber configurado VITE_GEMINI_API_KEY en Vercel y haber hecho un REDEPLOY.`);
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -70,8 +73,10 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
             
             INSTRUCTIONS:
             1. Identify specific colored climbing holds (presas). 
-               - CRITICAL: DO NOT select the small black screw holes (t-nuts/agujeros).
-               - ONLY select actual climbing holds with distinct color and volume.
+               - CRITICAL VISUAL DISTINCTION:
+                 * SCREW HOLES (T-NUTS): Small, flat, black/dark circles, flush with the wall, usually in a grid. NEVER SELECT THESE.
+                 * CLIMBING HOLDS: Larger, colorful (red, yellow, blue, green, etc.), have 3D volume, cast shadows, and have irregular shapes. ONLY SELECT THESE.
+               - If an object is black and perfectly circular, it is a screw hole. IGNORE IT.
             2. Assign a unique 'id' to each selected hold.
             3. Provide normalized coordinates (x, y) (0-1000). 
                (x=0 is left, x=1000 is ${width}m right; y=0 is top, y=1000 is ${height}m bottom).
@@ -85,7 +90,7 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
       },
     ],
     config: {
-      systemInstruction: "You are an expert climbing route setter. Your task is to identify actual climbing holds in images. You must NEVER, UNDER ANY CIRCUMSTANCES, select the small, dark, circular screw holes (t-nuts) that form a grid on the wall. These are NOT climbing holds. Only select objects that are clearly colored climbing holds with physical volume and shadows. Design routes for a 1.75m tall person with efficient, logical progression.",
+      systemInstruction: "You are an expert climbing route setter. Your task is to identify actual climbing holds in images. You must NEVER, UNDER ANY CIRCUMSTANCES, select the small, dark, circular screw holes (t-nuts) that form a grid on the wall. These are NOT climbing holds. Only select objects that are clearly colored climbing holds with physical volume, 3D texture, and cast shadows. If an object is a small black circle flush with the wall, it is a screw hole and must be ignored. Design routes for a 1.75m tall person with efficient, logical progression.",
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
