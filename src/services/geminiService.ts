@@ -36,8 +36,8 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
 
   const ai = new GoogleGenAI({ apiKey });
   
-  // Usamos ÚNICAMENTE el modelo 1.5-flash que es el que tiene 1500 peticiones/día garantizadas
-  const modelName = "gemini-1.5-flash";
+  // Usamos gemini-3-flash-preview que es el modelo compatible y rápido
+  const modelName = "gemini-3-flash-preview";
   
   try {
     console.log(`Iniciando análisis con modelo: ${modelName}`);
