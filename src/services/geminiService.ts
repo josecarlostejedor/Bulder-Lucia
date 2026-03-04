@@ -62,7 +62,10 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
                 * Maximum Horizontal Spread (between feet): 0.6 meters.
                 * Foot-to-Hand Vertical Distance: Feet MUST be between 0.4m and 0.8m below the hands for stability.
             - ROUTE EFFICIENCY:
-                * A 3.5m vertical route should have between 10 and 14 total holds to ensure small, manageable steps.
+                * A 3.5m vertical route should have between 8 and 12 total holds (including feet).
+                * A 6.5m transversal route should have between 12 and 18 total holds.
+                * NEVER exceed 20 total holds for a 3.5m vertical section.
+                * Use a logical human proportion for a 1.75m climber.
                 * Progression must be FLUID. If a step requires a foot move of more than 0.6m, it is INVALID.
                 * For every hand move, there should usually be a corresponding foot move to maintain balance.
             
