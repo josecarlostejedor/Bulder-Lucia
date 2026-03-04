@@ -341,8 +341,11 @@ export default function App() {
           >
             Boulder Itinerary Generator
           </motion.h1>
-          <p className="text-[#5A5A40] uppercase tracking-widest text-sm font-semibold">
+          <p className="text-[#5A5A40] uppercase tracking-widest text-sm font-semibold mb-2">
             Diseño de rutas asistido IES Lucía de Medrano • Escala: {wallWidth}m x {wallHeight}m
+          </p>
+          <p className="text-[#5A5A40]/60 text-xs font-medium italic">
+            App creada por Jose Carlos Tejedor
           </p>
         </header>
 
