@@ -35,6 +35,11 @@ export async function generateWordDocument(
             text: "IES Lucía de Medrano",
             heading: HeadingLevel.HEADING_2,
             alignment: AlignmentType.CENTER,
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            text: "App creada por José Carlos Tejedor",
+            alignment: AlignmentType.CENTER,
             spacing: { after: 400 },
           }),
           
