@@ -27,10 +27,27 @@ export interface Itinerary {
 
 export async function analyzeWall(imageData: string, prompt: string, width: number, height: number): Promise<Itinerary> {
   // Try to get API key from multiple possible sources for local and Vercel environments
-  const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
+  // In Vite, we use import.meta.env.VITE_...
+  // In some environments, process.env might be available
+  let apiKey = "";
   
-  if (!apiKey || apiKey === 'undefined') {
-    throw new Error('API_KEY_MISSING: No se ha encontrado la clave API de Gemini. En Vercel, añade VITE_GEMINI_API_KEY en Environment Variables.');
+  try {
+    apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  } catch (e) {
+    // Fallback if import.meta.env is not available
+  }
+
+  if (!apiKey) {
+    try {
+      // @ts-ignore
+      apiKey = process.env.GEMINI_API_KEY || "";
+    } catch (e) {
+      // Fallback if process is not defined
+    }
+  }
+  
+  if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
+    throw new Error('API_KEY_MISSING: No se ha encontrado la clave API de Gemini. En Vercel, asegúrate de haber añadido VITE_GEMINI_API_KEY en Environment Variables y haber hecho un REDEPLOY.');
   }
 
   const ai = new GoogleGenAI({ apiKey });
