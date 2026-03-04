@@ -264,7 +264,7 @@ export default function App() {
       let errorMsg = error.message || "Error al analizar la imagen. Por favor, inténtalo de nuevo.";
       
       if (error.message?.includes('API_KEY')) {
-        errorMsg = "Falta la API KEY de Gemini. Configúrala en las variables de entorno de Vercel como VITE_GEMINI_API_KEY.";
+        errorMsg = "Falta la API KEY de Gemini. En Vercel: 1. Añade VITE_GEMINI_API_KEY en Settings. 2. ¡Haz un REDEPLOY manual para aplicar los cambios!";
       } else if (error.message?.includes('429')) {
         errorMsg = "Límite de cuota excedido (429). Espera un momento o usa una clave de pago.";
       }
