@@ -26,8 +26,13 @@ export interface Itinerary {
 }
 
 export async function analyzeWall(imageData: string, prompt: string, width: number, height: number): Promise<Itinerary> {
-  // Forzamos el uso de la nueva clave proporcionada con .trim()
-  const apiKey = "AIzaSyAtSwcb5cIRAKiZZ5G49iEF3QYO-f5yk5o".trim();
+  // Usamos la variable de entorno para evitar que Google bloquee la clave por "leaked"
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  
+  if (!apiKey || apiKey.length < 10) {
+    throw new Error("Falta la API KEY. Configúrala en Vercel como VITE_GEMINI_API_KEY.");
+  }
+
   const ai = new GoogleGenAI({ apiKey });
   
   // Usamos gemini-3-flash-preview que es mucho más rápido para análisis de imágenes y JSON
