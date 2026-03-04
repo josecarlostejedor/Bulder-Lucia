@@ -291,8 +291,8 @@ export default function App() {
       img.src = base64Str;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1000; // Reducimos de 1200 a 1000 para ganar velocidad
-        const MAX_HEIGHT = 1000;
+        const MAX_WIDTH = 800; // Reducimos más para ganar velocidad máxima
+        const MAX_HEIGHT = 800;
         let width = img.width;
         let height = img.height;
 
