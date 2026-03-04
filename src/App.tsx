@@ -263,10 +263,15 @@ export default function App() {
       console.error("Analysis failed:", error);
       let errorMsg = error.message || "Error desconocido al analizar la imagen.";
       
-      if (error.message?.includes('API_KEY')) {
-        errorMsg = "Error de API KEY: La clave configurada no es válida o ha expirado. Verifica tu clave en Google AI Studio.";
+      // Si el error viene de Google, intentamos mostrar el detalle técnico
+      if (error.message) {
+        errorMsg = `Error técnico de Google: ${error.message}`;
+      }
+      
+      if (error.message?.includes('API_KEY') || error.message?.includes('API key')) {
+        errorMsg = `Error de API KEY: La clave configurada no es aceptada por Google.\n\nDetalle: ${error.message}\n\nVerifica en Google AI Studio que la clave sea correcta y tenga permisos para Gemini 3.1.`;
       } else if (error.message?.includes('429')) {
-        errorMsg = "Límite de cuota excedido (429). Por favor, espera un minuto antes de intentar de nuevo.";
+        errorMsg = "Límite de cuota excedido (429). Por favor, espera un minuto antes de intentar de nuevo o usa una clave con facturación habilitada.";
       }
       
       alert(`DETALLE DEL ERROR:\n${errorMsg}`);
