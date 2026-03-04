@@ -57,15 +57,14 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
             - Width: ${width} meters | Height: ${height} meters.
             - TARGET CLIMBER: Average height 1.75m.
             - HUMAN REACH CONSTRAINTS (MANDATORY):
-                * Maximum Distance (ANY consecutive holds): 0.7 meters (70cm).
-                * Maximum Foot-to-Foot Distance: 0.6 meters (60cm).
-                * Maximum Hand-to-Hand Distance: 0.7 meters (70cm).
-                * Foot-to-Hand Distance: Feet MUST be between 0.3m and 0.7m below the hands.
+                * Maximum Vertical Distance (between any two consecutive hand holds): 0.7 meters.
+                * Maximum Foot-to-Foot Distance: 0.5 meters (50cm) - MUST be reachable for a 1.75m person.
+                * Maximum Horizontal Spread (between feet): 0.6 meters.
+                * Foot-to-Hand Vertical Distance: Feet MUST be between 0.4m and 0.8m below the hands for stability.
             - ROUTE EFFICIENCY:
-                * A 3.5m vertical route should have between 8 and 12 total holds (including feet).
-                * DO NOT over-populate the route with unnecessary holds.
-                * Progression must be LOGICAL and DIRECT. Avoid excessive lateral movement if the route is vertical.
-                * Avoid "zig-zagging" unless requested.
+                * A 3.5m vertical route should have between 10 and 14 total holds to ensure small, manageable steps.
+                * Progression must be FLUID. If a step requires a foot move of more than 0.6m, it is INVALID.
+                * For every hand move, there should usually be a corresponding foot move to maintain balance.
             
             ROUTE ORIENTATION:
             - If 'vertical': Start at bottom, progress directly to top.
@@ -90,7 +89,7 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
       },
     ],
     config: {
-      systemInstruction: "You are an expert climbing route setter. Your task is to identify actual climbing holds in images. You must NEVER, UNDER ANY CIRCUMSTANCES, select the small, dark, circular screw holes (t-nuts) that form a grid on the wall. These are NOT climbing holds. Only select objects that are clearly colored climbing holds with physical volume, 3D texture, and cast shadows. If an object is a small black circle flush with the wall, it is a screw hole and must be ignored. Design routes for a 1.75m tall person with efficient, logical progression.",
+      systemInstruction: "You are an expert climbing route setter. Your task is to identify actual climbing holds in images. You must NEVER, UNDER ANY CIRCUMSTANCES, select the small, dark, circular screw holes (t-nuts) that form a grid on the wall. These are NOT climbing holds. Only select objects that are clearly colored climbing holds with physical volume, 3D texture, and cast shadows. Design routes for a 1.75m tall person with efficient, logical progression. Ensure foot placement is always within 40-80cm below the hands and foot-to-foot distance is no more than 50cm for stability and balance. If a move is too large, it is invalid.",
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
