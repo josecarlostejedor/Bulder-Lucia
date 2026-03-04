@@ -258,8 +258,8 @@ export default function App() {
       const orientationText = routeType === 'vertical' ? 'vertical (de abajo a arriba)' : 'transversal (travesía de lado a lado)';
       const fullPrompt = `Diseña una ruta de grado ${selectedGrade} (${selectedCategory}) con un recorrido ${orientationText}. ${prompt}. 
       RECUERDA: 
-      1. Máxima distancia entre presas 70cm (apto para 1.75m de altura).
-      2. Usa un número lógico de presas (aprox. 8-12 para el muro completo).
+      1. Máxima distancia entre pies 50cm y entre manos 70cm.
+      2. Los pies deben estar siempre entre 40cm y 80cm por debajo de las manos.
       3. NO USES los agujeros de los tornillos (pequeños círculos negros planos), solo presas de colores con volumen y sombras.`;
       
       const result = await analyzeWall(compressedImage, fullPrompt, wallWidth, wallHeight);
