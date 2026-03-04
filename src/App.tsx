@@ -260,7 +260,7 @@ export default function App() {
       RECUERDA: 
       1. Máxima distancia entre presas 70cm (apto para 1.75m de altura).
       2. Usa un número lógico de presas (aprox. 8-12 para el muro completo).
-      3. NO USES los agujeros de los tornillos, solo presas de colores.`;
+      3. NO USES los agujeros de los tornillos (pequeños círculos negros planos), solo presas de colores con volumen y sombras.`;
       
       const result = await analyzeWall(compressedImage, fullPrompt, wallWidth, wallHeight);
       setItinerary(result);
