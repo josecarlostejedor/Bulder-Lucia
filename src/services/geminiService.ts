@@ -37,8 +37,9 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
 
   const ai = new GoogleGenAI({ apiKey });
   
-  // Lista de modelos a intentar en orden de estabilidad/velocidad
-  const modelsToTry = ["gemini-flash-latest", "gemini-3-flash-preview"];
+  // Lista de modelos: Priorizamos el 1.5-flash que es el que tiene 1500 peticiones/día
+  // Los modelos "preview" o "experimental" tienen límites de solo 20-50 peticiones/día
+  const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-3-flash-preview"];
   let lastError = null;
 
   for (const modelName of modelsToTry) {
