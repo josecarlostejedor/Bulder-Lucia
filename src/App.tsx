@@ -260,7 +260,8 @@ export default function App() {
       RECUERDA: 
       1. Máxima distancia entre pies 50cm y entre manos 70cm.
       2. Los pies deben estar siempre entre 40cm y 80cm por debajo de las manos.
-      3. NO USES los agujeros de los tornillos (pequeños círculos negros planos), solo presas de colores con volumen y sombras.`;
+      3. Usa entre 8-12 presas para rutas verticales (3.5m) y 12-18 para transversales (6.5m).
+      4. NO USES los agujeros de los tornillos (pequeños círculos negros planos), solo presas de colores con volumen y sombras.`;
       
       const result = await analyzeWall(compressedImage, fullPrompt, wallWidth, wallHeight);
       setItinerary(result);
@@ -800,10 +801,6 @@ export default function App() {
                 <LegendItem color="#ef4444" label="Final" />
               </div>
             )}
-            
-            <p className="mt-8 text-center text-[#5A5A40]/60 text-xs font-medium italic">
-              App creada por Jose Carlos Tejedor
-            </p>
           </div>
         </div>
       </div>
