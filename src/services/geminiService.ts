@@ -26,14 +26,14 @@ export interface Itinerary {
 }
 
 export async function analyzeWall(imageData: string, prompt: string, width: number, height: number): Promise<Itinerary> {
-  // Limpiamos la clave de posibles espacios o comillas accidentales
-  const rawKey = (import.meta as any).env.VITE_GEMINI_API_KEY || "";
+  // Intentamos leer la clave de varias formas para asegurar compatibilidad con Vercel
+  const rawKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (process as any).env?.VITE_GEMINI_API_KEY || "";
   const apiKey = rawKey.trim().replace(/["']/g, "");
   
   if (!apiKey || !apiKey.startsWith("AIza")) {
     throw new Error(`La aplicación no detecta una clave válida. 
     Detectado: "${apiKey ? apiKey.substring(0, 4) + "..." : "NADA"}". 
-    Asegúrate de haber configurado VITE_GEMINI_API_KEY en Vercel y haber hecho un REDEPLOY.`);
+    PASOS: 1. Configura VITE_GEMINI_API_KEY en Vercel Settings. 2. Ve a Deployments y haz un REDEPLOY.`);
   }
 
   const ai = new GoogleGenAI({ apiKey });
