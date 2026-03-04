@@ -26,8 +26,8 @@ export interface Itinerary {
 }
 
 export async function analyzeWall(imageData: string, prompt: string, width: number, height: number): Promise<Itinerary> {
-  // Forzamos el uso de la clave proporcionada para asegurar funcionamiento inmediato en Vercel
-  const apiKey = "AIzaSyBE7BjiWhiv3YoZt2EPGuTtR01TNnnEXng";
+  // Forzamos el uso de la nueva clave proporcionada con .trim()
+  const apiKey = "AIzaSyAtSwcb5cIRAKiZZ5G49iEF3QYO-f5yk5o".trim();
   const ai = new GoogleGenAI({ apiKey });
   
   const response = await ai.models.generateContent({
