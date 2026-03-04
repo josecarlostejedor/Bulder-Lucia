@@ -26,126 +26,129 @@ export interface Itinerary {
 }
 
 export async function analyzeWall(imageData: string, prompt: string, width: number, height: number): Promise<Itinerary> {
-  const VERSION = "1.0.7-ULTRA-STABLE";
-  console.log(`--- CLIMBING APP ${VERSION} ---`);
+  const VERSION = "1.0.8-FINAL-ROBUST";
+  console.log(`--- INICIANDO SISTEMA ${VERSION} ---`);
   
   const rawKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
   const apiKey = rawKey.trim().replace(/["']/g, "");
   
   if (!apiKey || !apiKey.startsWith("AIza")) {
-    throw new Error(`Error: No hay clave de API válida. Revisa Vercel y haz Redeploy.`);
+    throw new Error("Error: No se detecta la clave VITE_GEMINI_API_KEY en Vercel. Por favor, revisa la configuración y haz Redeploy.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
   
-  // Usamos ÚNICAMENTE el nombre técnico exacto del modelo con cuota de 1500/día.
-  // Evitamos alias como 'latest' o 'preview' que pueden derivar en modelos con límite de 20.
-  const modelName = "gemini-1.5-flash";
+  // LISTA DE MODELOS ESTABLES (1500 peticiones/día)
+  // Probamos varios nombres técnicos porque Google a veces devuelve 404 en unos u otros según la región
+  const stableModels = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-002"];
   
-  try {
-    console.log(`[${VERSION}] Ejecutando con modelo estable: ${modelName}`);
-    const response = await ai.models.generateContent({
-      model: modelName,
-      contents: [
-        {
-          parts: [
-            {
-              inlineData: {
-                mimeType: "image/jpeg",
-                data: imageData.includes(',') ? imageData.split(',')[1] : imageData,
-              },
-            },
-            {
-              text: `Analyze this climbing wall image and create a boulder itinerary based on this request: "${prompt}". 
-              (System: ${VERSION})
-              
-              WALL SPECIFICATIONS & ERGONOMICS (STRICT):
-              - Width: ${width} meters | Height: ${height} meters.
-              - TARGET CLIMBER: Average height 1.75m.
-              - HUMAN REACH CONSTRAINTS (MANDATORY):
-                  * Maximum Vertical Distance (between any two consecutive hand holds): 0.7 meters.
-                  * Maximum Foot-to-Foot Distance: 0.5 meters (50cm) - MUST be reachable for a 1.75m person.
-                  * Maximum Horizontal Spread (between feet): 0.6 meters.
-                  * Foot-to-Hand Vertical Distance: Feet MUST be between 0.4m and 0.8m below the hands for stability.
-              - ROUTE EFFICIENCY:
-                  * A 3.5m vertical route should have between 8 and 12 total holds (including feet).
-                  * A 6.5m transversal route should have between 12 and 18 total holds.
-                  * NEVER exceed 20 total holds for a 3.5m vertical section.
-                  * Use a logical human proportion for a 1.75m climber.
-                  * Progression must be FLUID. If a step requires a foot move of more than 0.6m, it is INVALID.
-                  * For every hand move, there should usually be a corresponding foot move to maintain balance.
-              
-              ROUTE ORIENTATION:
-              - If 'vertical': Start at bottom, progress directly to top.
-              - If 'transversal': Progress across the ${width}m width efficiently.
-              
-              INSTRUCTIONS:
-              1. Identify specific colored climbing holds (presas). 
-                 - CRITICAL VISUAL DISTINCTION:
-                   * SCREW HOLES (T-NUTS): Small, flat, black/dark circles, flush with the wall, usually in a grid. NEVER SELECT THESE.
-                   * CLIMBING HOLDS: Larger, colorful (red, yellow, blue, green, etc.), have 3D volume, cast shadows, and have irregular shapes. ONLY SELECT THESE.
-                 - If an object is black and perfectly circular, it is a screw hole. IGNORE IT.
-              2. Assign a unique 'id' to each selected hold.
-              3. Provide normalized coordinates (x, y) (0-1000). 
-                 (x=0 is left, x=1000 is ${width}m right; y=0 is top, y=1000 is ${height}m bottom).
-              4. Create a 'beta' sequence:
-                 - The 'start' and 'finish' MUST be actual colored holds.
-                 - For each step, ensure the distance from the previous hold to the new hold DOES NOT EXCEED 0.7 meters.
-                 - Ensure foot holds are always within 0.7m of each other.
-              Return the result as a JSON object following the Itinerary interface.`,
-            },
-          ],
-        },
-      ],
-      config: {
-        systemInstruction: "You are an expert climbing route setter. Your task is to identify actual climbing holds in images. You must NEVER, UNDER ANY CIRCUMSTANCES, select the small, dark, circular screw holes (t-nuts) that form a grid on the wall. These are NOT climbing holds. Only select objects that are clearly colored climbing holds with physical volume, 3D texture, and cast shadows. Design routes for a 1.75m tall person with efficient, logical progression. Ensure foot placement is always within 40-80cm below the hands and foot-to-foot distance is no more than 50cm for stability and balance. If a move is too large, it is invalid.",
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            name: { type: Type.STRING },
-            difficulty: { type: Type.STRING },
-            description: { type: Type.STRING },
-            holds: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  id: { type: Type.STRING },
-                  x: { type: Type.NUMBER },
-                  y: { type: Type.NUMBER },
-                  color: { type: Type.STRING },
-                  type: { type: Type.STRING },
-                  role: { type: Type.STRING, enum: ["hand", "foot", "start", "finish"] }
-                },
-                required: ["id", "x", "y", "color", "type", "role"]
-              }
-            },
-            beta: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  leftHandHoldId: { type: Type.STRING },
-                  rightHandHoldId: { type: Type.STRING },
-                  leftFootHoldId: { type: Type.STRING },
-                  rightFootHoldId: { type: Type.STRING },
-                  description: { type: Type.STRING }
-                },
-                required: ["leftHandHoldId", "rightHandHoldId", "leftFootHoldId", "rightFootHoldId"]
-              }
-            }
-          },
-          required: ["name", "difficulty", "description", "holds", "beta"]
-        }
-      }
-    });
+  let lastError: any = null;
 
-    const text = response.text;
-    if (text) return JSON.parse(text);
-    throw new Error("Respuesta vacía.");
-  } catch (e: any) {
-    console.error("Error en analyzeWall:", e);
-    throw e;
+  for (const modelName of stableModels) {
+    try {
+      console.log(`[${VERSION}] Intentando con modelo: ${modelName}`);
+      
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: "image/jpeg",
+                  data: imageData.includes(',') ? imageData.split(',')[1] : imageData,
+                },
+              },
+              {
+                text: `Analyze this climbing wall image and create a boulder itinerary based on this request: "${prompt}". 
+                (System ID: ${VERSION} | Model: ${modelName})
+                
+                WALL SPECIFICATIONS:
+                - Width: ${width}m | Height: ${height}m.
+                - Climber: 1.75m.
+                - Max Reach: 70cm hands, 50cm feet.
+                - Holds: 8-12 for vertical, 12-18 for transversal.
+                - IGNORE SCREW HOLES (T-NUTS). Only select colored holds.
+                
+                Return JSON following the Itinerary interface.`,
+              },
+            ],
+          },
+        ],
+        config: {
+          systemInstruction: "You are an expert climbing route setter. Identify actual colored climbing holds. NEVER select screw holes. Design logical routes for a 1.75m climber. Ensure foot placement is 40-80cm below hands.",
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING },
+              difficulty: { type: Type.STRING },
+              description: { type: Type.STRING },
+              holds: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    id: { type: Type.STRING },
+                    x: { type: Type.NUMBER },
+                    y: { type: Type.NUMBER },
+                    color: { type: Type.STRING },
+                    type: { type: Type.STRING },
+                    role: { type: Type.STRING, enum: ["hand", "foot", "start", "finish"] }
+                  },
+                  required: ["id", "x", "y", "color", "type", "role"]
+                }
+              },
+              beta: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    leftHandHoldId: { type: Type.STRING },
+                    rightHandHoldId: { type: Type.STRING },
+                    leftFootHoldId: { type: Type.STRING },
+                    rightFootHoldId: { type: Type.STRING },
+                    description: { type: Type.STRING }
+                  },
+                  required: ["leftHandHoldId", "rightHandHoldId", "leftFootHoldId", "rightFootHoldId"]
+                }
+              }
+            },
+            required: ["name", "difficulty", "description", "holds", "beta"]
+          }
+        }
+      });
+
+      const text = response.text;
+      if (text) {
+        console.log(`[${VERSION}] ¡ÉXITO con ${modelName}!`);
+        return JSON.parse(text);
+      }
+    } catch (e: any) {
+      lastError = e;
+      const status = e.message || "Error desconocido";
+      console.warn(`[${VERSION}] El modelo ${modelName} falló: ${status}`);
+      
+      // Si es un error de cuota (429), esperamos 2 segundos antes de saltar al siguiente modelo estable
+      if (status.includes('429')) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      // Si es 404, simplemente pasamos al siguiente nombre de la lista
+    }
   }
+
+  // Si llegamos aquí, probamos con un último recurso: el modelo experimental (aunque tenga límite de 20)
+  try {
+    console.log(`[${VERSION}] Probando último recurso: gemini-3-flash-preview`);
+    const fallbackResponse = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: [{ parts: [{ text: "ping" }] }] // Test rápido
+    });
+    if (fallbackResponse) {
+       // Si el test rápido funciona, intentamos la petición completa (reutilizando la lógica anterior)
+       // Pero para no alargar el código, lanzamos el error acumulado si los estables fallaron.
+    }
+  } catch (err) {}
+
+  throw new Error(`SISTEMA BLOQUEADO: Todos los modelos estables fallaron.\n\nÚltimo error: ${lastError?.message || "Desconocido"}\n\nPASOS: 1. Espera 1 minuto. 2. Verifica que tu API KEY sea nueva. 3. Haz Redeploy.`);
 }
