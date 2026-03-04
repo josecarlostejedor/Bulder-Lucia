@@ -346,7 +346,7 @@ export default function App() {
             Diseño de rutas asistido IES Lucía de Medrano • Escala: {wallWidth}m x {wallHeight}m
           </p>
           <p className="text-[#5A5A40]/60 text-xs font-medium italic">
-            App creada por Jose Carlos Tejedor
+            App creada por Jose Carlos Tejedor • v1.0.6-STABLE
           </p>
         </header>
 
