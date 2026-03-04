@@ -38,9 +38,9 @@ export async function analyzeWall(imageData: string, prompt: string, width: numb
 
   const ai = new GoogleGenAI({ apiKey });
   
-  // Usamos gemini-3-flash-preview que es mucho más rápido para análisis de imágenes y JSON
+  // Cambiamos a gemini-1.5-flash que es el modelo más rápido y estable para producción
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-1.5-flash",
     contents: [
       {
         parts: [
