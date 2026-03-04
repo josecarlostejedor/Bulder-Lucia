@@ -253,13 +253,23 @@ export default function App() {
     setLoading(true);
     try {
       const orientationText = routeType === 'vertical' ? 'vertical (de abajo a arriba)' : 'transversal (travesía de lado a lado)';
-      const fullPrompt = `Diseña una ruta de grado ${selectedGrade} (${selectedCategory}) con un recorrido ${orientationText}. ${prompt}`;
+      const fullPrompt = `Diseña una ruta de grado ${selectedGrade} (${selectedCategory}) con un recorrido ${orientationText}. ${prompt}. RECUERDA: Máxima distancia entre presas 70cm.`;
       const result = await analyzeWall(image, fullPrompt, wallWidth, wallHeight);
       setItinerary(result);
-      setHistory(prev => [result, ...prev].slice(0, 5)); // Keep last 5
-    } catch (error) {
+      setHistory(prev => [result, ...prev].slice(0, 5));
+      setShowToast("¡Itinerario generado con éxito!");
+      setTimeout(() => setShowToast(null), 3000);
+    } catch (error: any) {
       console.error("Analysis failed:", error);
-      alert("Error al analizar la imagen. Por favor, inténtalo de nuevo.");
+      let errorMsg = "Error al analizar la imagen. Por favor, inténtalo de nuevo.";
+      
+      if (error.message?.includes('API_KEY')) {
+        errorMsg = "Falta la API KEY de Gemini. Configúrala en las variables de entorno como VITE_GEMINI_API_KEY.";
+      } else if (error.message?.includes('429')) {
+        errorMsg = "Límite de cuota excedido. Espera un momento o usa una clave de pago.";
+      }
+      
+      alert(errorMsg);
     } finally {
       setLoading(false);
     }
